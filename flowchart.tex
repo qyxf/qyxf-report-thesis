@@ -1,0 +1,104 @@
+%\documentclass{ctexart}
+%\usepackage{Tikz}
+%\usetikzlibrary{shapes,arrows,chains}
+%\begin{document}
+
+%\centering
+% Set up a new layer for the debugging marks, and make sure it is on
+% top
+
+\pgfdeclarelayer{marx}
+\pgfsetlayers{main,marx}
+
+\providecommand{\cmark}[2][]{%
+  \begin{pgfonlayer}{marx}
+    \node [nmark] at (c#2#1) {#2};
+  \end{pgfonlayer}{marx}
+  } 
+\providecommand{\cmark}[2][]{\relax} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[%
+    >=triangle 60,              % Nice arrows; your taste may be different
+    start chain=going below,    % General flow is top-to-bottom
+    node distance=6mm and 50mm, % Global setup of box spacing
+    every join/.style={norm},   % Default linetype for connecting boxes
+    ]
+
+\tikzset{
+  base/.style={draw, on chain, on grid, align=center, minimum height=4ex},
+  proc/.style={base, rectangle, text width=8em},
+  test/.style={base, diamond, aspect=2, text width=3.5em},
+  term/.style={proc, rounded corners},
+  coord/.style={coordinate, on chain, on grid, node distance=6mm and 20mm},
+  nmark/.style={draw, cyan, circle, font={\sffamily\bfseries}},
+  % -------------------------------------------------
+  norm/.style={->, draw},
+  free/.style={->, draw},
+  cong/.style={->, draw},
+  it/.style={font={\small\itshape}}
+}
+% -------------------------------------------------
+
+\node [term, join]      {上电};
+\node [proc, join] (p0) {初始化程序};
+\node [proc, join] (p1)  {读取键盘输入};
+\node [test, join] (t1) {输入的类型};
+\node [proc] (p2) {$0 \sim 9$};
+\node [test, join] (t2) {状态类型?};
+\node [proc, join] (p3) {新赋值到value1};
+\node [test, join] (t3) {是否超过四位？};
+\node [proc, join] (p7) {送数码管显示};
+
+\node [proc, right= of p2] (p4) {$+-\times\div$};
+\node [proc, join=by free] {置状态数为1};
+\node [proc, join=by free] (p5) {清屏};
+
+\node [proc, right= of p4] (p6) {$=$};
+\node [proc, join=by free] {运算};
+\node [test, join=by free] (t5) {结果是否越位};
+\node [proc, join=by free] (p8) {显示越位，并声音报警};
+
+\node [proc, right= of t3] (p9) {报警};
+\node [proc, join=by free] (p13) {显示输入无效};
+\node [proc, right= of p3] (p10) {新赋值到value2};
+\node [proc, right= of t1, yshift=3em] (p11) {清零};
+\node [proc, right= of p1, yshift=2em] (p12) {清空内存};
+\node [term, right= of p13] (p14) {显示运算结果};
+%\node [proc, right= of p13] (p14) {};
+
+% -------------------------------------------------
+\node [coord, right=of t1] (c1)  {c1}; 
+\node [coord, right =of p4 ] (c2)  {c2}; 
+\node [coord, left= of p6] (c0) {c0};
+\node [coord, right= of p1] (c3) {};
+\node [coord, left= of t5] (c4) {};
+\node [coord, below= of p10] (c5) {};
+\node [coord, below= of p13] (c6) {};
+\node [coord, below= of p7] (c7) {};
+\node [coord, right= of t5] (c8) {};
+\node [coord, right= of p11] (c9) {};
+\node [coord, left= of p1] (c10) {};
+\node [coord, right= of t2] (c11) {};
+
+
+\path (t1.south) to node [near start, xshift=2em] {数字} (p2);
+  \draw [o->] (t1.south) -- (p2);
+\path (t1.east) to node [near start, yshift=-2em] {结果} (c2); 
+  \draw [o->] (t1.east) -| (c2) |- (p6);
+ \path (t1.east) to node [near start, yshift=1em] {运算符} (c1); 
+   \draw [o->] (t1.east) -- (c1) |- (p4);
+ \path (t3.east) to node [near start, yshift=1em] {是} (p9);
+  \draw [o->] (t3.east) -- (p9);
+  \draw [o->] (t2.east) -- (p10);
+  \draw [*->] (p10.south) |- (c5) -| (t3);
+  \draw [->] (p11.north) -| (p12.south);
+  \draw [*->] (p12.west) -| (c3) |- (p1.east);
+  \draw [o->] (t1.east) -- (c1) |- (p11);
+  
+  \path (t5.west) to node [near start, yshift=1em] {否} (c4);  
+  \path (t2.east) to node [near start, yshift=1em] {1} (c11);  
+  \draw [o->] (t5.west) -| (c4) |- (p14);
+  \draw [*->] (p13.south) -| (c6) -| (c8) |- (c9) |- (p11.east);
+  \draw [*->] (p7.south) -- (c7) -| (c10) -- (p1.west);
+\end{tikzpicture}
+%\end{document}
